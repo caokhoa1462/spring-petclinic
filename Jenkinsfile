@@ -25,7 +25,7 @@ pipeline {
             steps {
                 // Jenkins dùng SSH để sang EC2 và chạy lệnh restart
                 sshagent(['ec2-ssh-key']) {
-                    sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_PUBLIC_IP} 'cd ~/spring-petclinic && docker compose pull && docker compose up -d'"
+                    sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_PUBLIC_IP} 'cd ~/petclinic/petclinic-app && docker compose pull && docker compose up -d'"
                 }
             }
         }
