@@ -5,7 +5,7 @@ pipeline {
         DOCKER_HUB_USER = 'caokhoa1462'
         IMAGE_NAME = 'petclinic-app'
         IMAGE_TAG = "${BRANCH_NAME}-${BUILD_NUMBER}" 
-        EC2_PUBLIC_IP = '47.130.5.155'
+        EC2_PUBLIC_IP = '18.142.137.95'
     }
 
     stages {
@@ -31,18 +31,17 @@ pipeline {
         stage('Security Scan: Trivy') {
             steps {
                 sh 'mkdir -p ${HOME}/.cache/trivy'
-                
+
                 sh """
                     docker run --rm \
                     -v /var/run/docker.sock:/var/run/docker.sock \
                     -v \$HOME/.cache/trivy:/root/.cache/trivy \
-                    -v \$(pwd):/workspace -w /workspace \
                     aquasec/trivy:0.58.2 image \
-                    --format template --template "@/contrib/html.tpl" -o trivy-report.html \
+                    --format template --template "@/contrib/html.tpl" \
                     --timeout 15m \
                     --exit-code 0 \
                     --severity HIGH,CRITICAL \
-                    ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
+                    ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} > trivy-report.html
                 """
             }
         }
