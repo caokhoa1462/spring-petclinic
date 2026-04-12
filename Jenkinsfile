@@ -36,7 +36,7 @@ pipeline {
             }
         }
 
-        // --- STAGE NÀY CHỈ CHẠY KHI LÀ NHÁNH MAIN ---
+        // ---- STAGE NÀY CHỈ CHẠY KHI LÀ NHÁNH MAIN ----
         stage('Push & Deploy to Production') {
             when {
                 branch 'main'
@@ -52,7 +52,7 @@ pipeline {
             }
         }
 
-        // --- STAGE NÀY CHỈ CHẠY KHI LÀ NHÁNH DEVELOP ---
+        // ---- STAGE NÀY CHỈ CHẠY KHI LÀ NHÁNH DEVELOP ----
         stage('Notify Success (Develop)') {
             when {
                 branch 'develop'
