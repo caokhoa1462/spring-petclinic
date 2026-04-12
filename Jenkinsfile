@@ -18,7 +18,6 @@ pipeline {
         stage('Security Scan: OWASP') {
             steps {
                 sh 'chmod +x mvnw'
-                // Thêm -Dformat=ALL để sau này plugin Jenkins đọc được biểu đồ
                 sh './mvnw org.owasp:dependency-check-maven:check -Dformat=ALL'
             }
         }
@@ -31,15 +30,15 @@ pipeline {
 
         stage('Security Scan: Trivy') {
             steps {
-                echo "Đang chạy Trivy với bộ nhớ đệm cố định..."
-                // Tạo thư mục cache trên máy host nếu chưa có
                 sh 'mkdir -p ${HOME}/.cache/trivy'
                 
                 sh """
                     docker run --rm \
                     -v /var/run/docker.sock:/var/run/docker.sock \
-                    -v ${HOME}/.cache/trivy:/root/.cache/trivy \
+                    -v \$HOME/.cache/trivy:/root/.cache/trivy \
+                    -v \$(pwd):/workspace -w /workspace \
                     aquasec/trivy:0.58.2 image \
+                    --format template --template "@contrib/html.tpl" -o trivy-report.html \
                     --timeout 15m \
                     --exit-code 0 \
                     --severity HIGH,CRITICAL \
@@ -51,7 +50,6 @@ pipeline {
         stage('Push & Deploy to Production') {
             when { branch 'main' }
             steps {
-                // 1. Đẩy Image lên Docker Hub
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
                     sh "echo \$PASS | docker login -u \$USER --password-stdin"
                     sh "docker push ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
@@ -59,8 +57,6 @@ pipeline {
                 
                 // 2. Deploy lên EC2
                 sshagent(['ec2-ssh-key']) {
-                    // MẸO: Sửa file docker-compose.yml để nó khớp với IMAGE_TAG vừa build
-                    // Lệnh này tìm tên image cũ và thay bằng image mới kèm tag vừa tạo
                     sh "sed -i 's|image: ${DOCKER_HUB_USER}/${IMAGE_NAME}:.*|image: ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}|g' docker-compose.yml"
                     
                     sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_PUBLIC_IP} 'mkdir -p ~/petclinic'"
@@ -78,12 +74,25 @@ pipeline {
         }
     }
 
-    // Tầng 1: Lưu trữ báo cáo bảo mật
     post {
         always {
-            // Lưu lại file báo cáo để có thể xem lại trên Jenkins
-            archiveArtifacts artifacts: '**/target/dependency-check-report.html', allowEmptyArchive: true
-            echo "Pipeline đã kết thúc. Hãy kiểm tra Artifacts để xem báo cáo bảo mật!"
+            publishHTML([
+                allowMissing: false,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'target',
+                reportFiles: 'dependency-check-report.html',
+                reportName: 'OWASP Security Report'
+            ])          
+            publishHTML([
+            allowMissing: false,
+            alwaysLinkToLastBuild: true,
+            keepAll: true,
+            reportDir: '.',
+            reportFiles: 'trivy-report.html',
+            reportName: 'Trivy Scan Report'
+        ])
+            archiveArtifacts artifacts: '**/target/dependency-check-report.html, trivy-report.html', allowEmptyArchive: true
         }
     }
 }
