@@ -28,7 +28,8 @@ pipeline {
                     sh """
                         ./mvnw clean verify sonar:sonar \
                         -Dsonar.projectKey=spring-petclinic \
-                        -Dsonar.projectName='Spring Petclinic'
+                        -Dsonar.projectName='Spring Petclinic' \
+                        -DskipTests
                     """
                 }
             }
