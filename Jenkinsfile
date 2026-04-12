@@ -31,9 +31,14 @@ pipeline {
 
         stage('Security Scan: Trivy') {
             steps {
-                echo "Đang chạy Trivy để quét Docker Image (với thời gian chờ dài hơn)..."
+                echo "Đang chạy Trivy với bộ nhớ đệm cố định..."
+                // Tạo thư mục cache trên máy host nếu chưa có
+                sh 'mkdir -p ${HOME}/.cache/trivy'
+                
                 sh """
-                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                    docker run --rm \
+                    -v /var/run/docker.sock:/var/run/docker.sock \
+                    -v ${HOME}/.cache/trivy:/root/.cache/trivy \
                     aquasec/trivy:0.58.2 image \
                     --timeout 15m \
                     --exit-code 0 \
