@@ -11,7 +11,25 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                checkout scm
+                checkout([$class: 'GitSCM', 
+                    branches: scm.branches, 
+                    doGenerateSubmoduleConfigurations: scm.doGenerateSubmoduleConfigurations, 
+                    extensions: scm.extensions + [[$class: 'CloneOption', depth: 0, noTags: false, reference: '']], 
+                    userRemoteConfigs: scm.userRemoteConfigs
+                ])
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                echo "Gửi mã nguồn sang EC2-B để phân tích chất lượng..."
+                withSonarQubeEnv('SonarQube-Server') {
+                    sh """
+                        ./mvnw clean verify sonar:sonar \
+                        -Dsonar.projectKey=spring-petclinic \
+                        -Dsonar.projectName='Spring Petclinic'
+                    """
+                }
             }
         }
 
