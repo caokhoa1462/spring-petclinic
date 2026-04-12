@@ -68,7 +68,7 @@ pipeline {
         stage('Notify Success (Develop)') {
             when { branch 'develop' }
             steps {
-                echo "Build và Quét bảo mật thành công cho nhánh DEVELOP. Sẵn sàng để Merge!"
+                echo "Build and Security scan completed for the develop branch. You can merge now!"
             }
         }
     }
