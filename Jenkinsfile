@@ -38,7 +38,7 @@ pipeline {
                     -v \$HOME/.cache/trivy:/root/.cache/trivy \
                     -v \$(pwd):/workspace -w /workspace \
                     aquasec/trivy:0.58.2 image \
-                    --format template --template "@contrib/html.tpl" -o trivy-report.html \
+                    --format template --template "@/contrib/html.tpl" -o trivy-report.html \
                     --timeout 15m \
                     --exit-code 0 \
                     --severity HIGH,CRITICAL \
