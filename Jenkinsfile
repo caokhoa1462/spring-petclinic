@@ -68,7 +68,7 @@ pipeline {
         stage('Notify Success (Develop)') {
             when { branch 'develop' }
             steps {
-                echo "Build and Security scan completed for the develop branch. You can merge now!"
+                echo "Build and Security scan completed for the develop branch. You can merge to main now!"
             }
         }
     }
