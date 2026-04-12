@@ -31,7 +31,15 @@ pipeline {
 
         stage('Security Scan: Trivy') {
             steps {
-                sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.58.2 image --exit-code 0 --severity HIGH,CRITICAL ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                echo "Đang chạy Trivy để quét Docker Image (với thời gian chờ dài hơn)..."
+                sh """
+                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                    aquasec/trivy:0.58.2 image \
+                    --timeout 15m \
+                    --exit-code 0 \
+                    --severity HIGH,CRITICAL \
+                    ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
+                """
             }
         }
 
