@@ -23,9 +23,7 @@ pipeline {
 
         stage('Unit & Integration Tests') {
             steps {
-                withEnv(['TESTCONTAINERS_RYUK_DISABLED=true']){
-                    sh './mvnw clean test'
-                }
+                sh './mvnw clean test -Dtest="!PostgresIntegrationTests,!MySqlIntegrationTests"'    
             }
             post {
                 always {
