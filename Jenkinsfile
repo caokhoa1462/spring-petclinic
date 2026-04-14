@@ -138,6 +138,8 @@ pipeline {
             reportFiles: 'trivy-report.html',
             reportName: 'Trivy Scan Report'
         ])
+            sh 'mkdir -p reports && cp *.html *.xml target/site/jacoco/jacoco.xml reports/ || true'
+            sh 'aws s3 sync reports/ s3://petclinic-logs-reports/build-${BUILD_NUMBER}/'
             archiveArtifacts artifacts: '**/target/dependency-check-report.html, trivy-report.html', allowEmptyArchive: true
         }
     }
