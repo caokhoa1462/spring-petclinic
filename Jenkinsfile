@@ -21,15 +21,26 @@ pipeline {
             }
         }
 
+        stage('Unit & Integration Tests') {
+            steps {
+                withEnv(['TESTCONTAINERS_RYUK_DISABLED=true']){
+                    sh './mvnw clean test'
+                }
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
-                echo "Gửi mã nguồn sang EC2-B để phân tích chất lượng..."
                 withSonarQubeEnv('SonarQube-Server') {
                     sh """
-                        ./mvnw clean verify sonar:sonar \
+                        ./mvnw sonar:sonar \
                         -Dsonar.projectKey=spring-petclinic \
-                        -Dsonar.projectName='Spring Petclinic' \
-                        -DskipTests
+                        -Dsonar.projectName='Spring Petclinic'
                     """
                 }
             }
