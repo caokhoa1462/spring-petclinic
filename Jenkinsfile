@@ -45,6 +45,23 @@ pipeline {
             }
         }
 
+        stage('Quality Gate') {
+            steps {
+                script {
+                    // Kiểm tra xem đây có phải là một Pull Request hay không
+                    // CHANGE_ID là biến môi trường tự động có khi Jenkins chạy PR
+                    def isPR = env.CHANGE_ID != null
+
+                    echo "Đang kiểm tra chất lượng mã nguồn..."
+                    timeout(time: 5, unit: 'MINUTES') {
+                        // Nếu là PR, abortPipeline: true sẽ đánh đỏ và CHẶN Merge trên GitHub
+                        // Nếu là nhánh thường, chúng ta có thể để false để Pipeline vẫn xanh nhưng hiện cảnh báo
+                        waitForQualityGate abortPipeline: isPR
+                    }
+                }
+            }
+        }
+
         stage('Security Scan: OWASP') {
             steps {
                 sh 'chmod +x mvnw'
