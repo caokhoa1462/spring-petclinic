@@ -5,7 +5,7 @@ pipeline {
         DOCKER_HUB_USER = 'caokhoa1462'
         IMAGE_NAME = 'petclinic-app'
         IMAGE_TAG = "${BRANCH_NAME}-${BUILD_NUMBER}" 
-        EC2_PUBLIC_IP = '18.142.137.95'
+        EC2_PUBLIC_IP = '13.214.140.206'
     }
 
     stages {
