@@ -23,7 +23,7 @@ pipeline {
 
         stage('Unit & Integration Tests') {
             steps {
-                sh './mvnw clean test -Dtest="!PostgresIntegrationTests,!MySqlIntegrationTests"'    
+                sh './mvnw clean test jacoco:report -Dtest="!PostgresIntegrationTests,!MySqlIntegrationTests"'    
             }
             post {
                 always {
@@ -38,7 +38,8 @@ pipeline {
                     sh """
                         ./mvnw sonar:sonar \
                         -Dsonar.projectKey=spring-petclinic \
-                        -Dsonar.projectName='Spring Petclinic'
+                        -Dsonar.projectName='Spring Petclinic' \
+                        -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
                     """
                 }
             }
